@@ -1,0 +1,99 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+def display_image(title, image):
+    """Display an image using Matplotlib."""
+    plt.figure()
+    plt.title(title)
+    if len(image.shape) == 2:
+        plt.imshow(image, cmap='gray')
+    else:
+        plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.axis('off')
+    plt.show()
+
+def process_image(image_path):
+    """Perform basic image processing: grayscale, binary, scaling, and denoising."""
+    print(f"Attempting to load image from: {image_path}")
+    
+    # Load the image
+    image = cv2.imread(image_path)
+    if image is None:
+        print("Error: Could not load image. Please check the file path.")
+        return
+    print(f"Original Image Size: {image.shape}")
+    display_image("Original Image", image)
+    
+    # Convert to Grayscale
+    grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite('grayscale.jpg', grayscale)
+    print("Grayscale image saved.")
+    display_image("Grayscale Image", grayscale)
+    
+    # Convert to Binary
+    _, binary = cv2.threshold(grayscale, 127, 255, cv2.THRESH_BINARY)
+    cv2.imwrite('binary.jpg', binary)
+    print("Binary image saved.")
+    display_image("Binary Image", binary)
+    
+    # Scale down the image
+    height, width = image.shape[:2]
+    scaled = cv2.resize(image, (width // 4, height // 4), interpolation=cv2.INTER_AREA)
+    cv2.imwrite('scaled.jpg', scaled)
+    print("Scaled image saved.")
+    display_image("Scaled Image", scaled)
+    
+    # Denoise image using Gaussian Blur
+    denoised = cv2.GaussianBlur(image, (5, 5), 0)
+    cv2.imwrite('denoised.jpg', denoised)
+    print("Denoised image saved.")
+    display_image("Denoised Image", denoised)
+
+def advanced_image_processing(image_path):
+    """Perform advanced image processing: inversion, contrast stretching, histogram equalization, edge detection."""
+    print(f"Attempting to load image from: {image_path}")
+    
+    # Load the image in grayscale
+    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    if image is None:
+        print("Error: Could not load image. Please check the file path.")
+        return
+    print("Image loaded successfully for advanced processing.")
+    display_image("Grayscale Image for Processing", image)
+    
+    # Inverse transformation
+    inverted = cv2.bitwise_not(image)
+    cv2.imwrite('inverted.jpg', inverted)
+    print("Inverted image saved.")
+    display_image("Inverted Image", inverted)
+    
+    # Contrast stretching
+    min_val, max_val = np.min(image), np.max(image)
+    contrast_stretched = ((image - min_val) / (max_val - min_val) * 255).astype(np.uint8)
+    cv2.imwrite('contrast_stretched.jpg', contrast_stretched)
+    print("Contrast-stretched image saved.")
+    display_image("Contrast-Stretched Image", contrast_stretched)
+    
+    # Histogram Equalization
+    hist_eq = cv2.equalizeHist(image)
+    cv2.imwrite('histogram_equalized.jpg', hist_eq)
+    print("Histogram-equalized image saved.")
+    display_image("Histogram Equalized Image", hist_eq)
+    
+    # Edge Detection (Canny)
+    edges = cv2.Canny(image, 100, 200)
+    cv2.imwrite('edges.jpg', edges)
+    print("Edge-detected image saved.")
+    display_image("Edge Detected Image", edges)
+
+if __name__ == "__main__":
+    image_path = "/content/mushroom.jpg"  # Change this to your actual image path
+    if not os.path.exists(image_path):
+        print(f"Error: The file '{image_path}' does not exist. Please check the path.")
+    else:
+        print(f"Current working directory: {os.getcwd()}")
+        process_image(image_path)
+        advanced_image_processing(image_path)
+        print("Processing complete. Check the output images.")
